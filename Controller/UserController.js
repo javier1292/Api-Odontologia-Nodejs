@@ -2,6 +2,7 @@
 var validator = require("validator");
 var User = require("../model/user");
 var bcrypt = require("bcrypt-nodejs");
+var jwt = require("../services/jwt");
 
 var controller = {
   save: function (req, res) {
@@ -63,11 +64,9 @@ var controller = {
               //devolver la respuesta
               return res.status(200).send({
                 message: "Usuario guardado correctamente ",
-                user: userStored
+                user: userStored,
               });
             });
-
-          
           });
         } else {
           return res.status(400).send({
@@ -82,6 +81,65 @@ var controller = {
       });
     }
   },
+  login: function (req, res) {
+    //recoger los parametros de la peticion
+    var params = req.body;
+
+    //validar datos
+    var validate_email =
+      !validator.isEmpty(params.email) && validator.isEmail(params.email);
+    var validate_password = !validator.isEmpty(params.password);
+
+    if (!validate_email && validate_password) {
+      return res.status(400).send({
+        message: "los datos son incorrectos ",
+      });
+    }
+    //buscar usuarios que coincida con el email que nos llega
+    User.findOne({ email: params.email.toLowerCase() }, (err, user) => {
+      //comprobar si nos llega un error
+      if (err) {
+        return res.status(400).send({
+          message: "User no encontrado ",
+        });
+      }
+
+      //comprrbare si trae un usuario
+      if (!user) {
+        return res.status(400).send({
+          message: "User no encontrado ",
+        });
+      }
+
+      //si se encuentra
+      //comprobar la password (coincidencia con email y password / bcrypt)
+      bcrypt.compare(params.password, user.password, (err, check) => {
+        //si es correcto
+        if (check) {
+          //generar token con jwt
+          if (params.gettoken) {
+            // devolver los datos de login
+            return res.status(200).send({
+              message: "Login succes",
+              token: jwt.createToken(user),
+            });
+          } else {
+            //Limpiar el objeto
+            user.password = undefined;
+          }
+        } else {
+          return res.status(400).send({
+            message: "los credenciales no son corre3ctas ",
+          });
+        }
+      });
+    });
+  },
+  update: function(req, res){
+    res.status(200).send({
+      message: "update user"
+    });
+  }
 };
 
 module.exports = controller;
