@@ -136,9 +136,51 @@ var controller = {
     });
   },
   update: function(req, res){
-    res.status(200).send({
-      message: "update user"
+    //recoger los datos del usuari
+    var params = req.body;
+    //vaqlidar datos
+    try {
+
+      var validate_name = !validator.isEmpty(params.name);
+      var validate_surname = !validator.isEmpty(params.surname);
+      var validate_email =
+        !validator.isEmpty(params.email) && validator.isEmail(params.email);
+     
+    }catch(err){
+      res.status(400).send({
+        message: "faltan datos por enviar ",
+        params
+      });
+    };
+
+    //eliminar propiedades innecesarias 
+    delete params.password;
+    //user id  
+    var userId = req.user.sub;
+    //buscar y actualizar documentos de la base de datos 
+    User.findOneAndUpdate({_id: userId},params,{new:true},(err,userupdated)=>{
+
+      if(err){
+        res.status(500).send({
+          message: "error al actualizar el user",
+          user: userupdated
+        });
+      }
+
+      if(!userupdated){
+        res.status(500).send({
+          message: "error",
+          user: userupdated
+        });
+      }
+      //devolver respusta
+      res.status(200).send({
+        message: "update user",
+        user: userupdated
+      });
+
     });
+
   }
 };
 
