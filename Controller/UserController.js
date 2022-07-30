@@ -157,29 +157,52 @@ var controller = {
     delete params.password;
     //user id  
     var userId = req.user.sub;
-    //buscar y actualizar documentos de la base de datos 
-    User.findOneAndUpdate({_id: userId},params,{new:true},(err,userupdated)=>{
 
-      if(err){
-        res.status(500).send({
-          message: "error al actualizar el user",
-          user: userupdated
-        });
-      }
+    //comprobar el email 
+    if(req.user.email != params.email){
+      User.findOne({email:params.email.toLowerCase()},(err,user)=>{
+        if(err){
+          res.status(500).send({
+            message: "error al intentar identificarse",
+            
+          });
+        }
+  
+        if(user && user.email == params.email){
+          res.status(200).send({
+            message: "el email no puede ser modificado",
+            
+          });
+        }
 
-      if(!userupdated){
-        res.status(500).send({
-          message: "error",
-          user: userupdated
-        });
-      }
-      //devolver respusta
-      res.status(200).send({
-        message: "update user",
-        user: userupdated
       });
+    }else{
 
-    });
+      //buscar y actualizar documentos de la base de datos 
+      User.findOneAndUpdate({_id: userId},params,{new:true},(err,userupdated)=>{
+  
+        if(err){
+          res.status(500).send({
+            message: "error al actualizar el user",
+            user: userupdated
+          });
+        }
+  
+        if(!userupdated){
+          res.status(500).send({
+            message: "error",
+            user: userupdated
+          });
+        }
+        //devolver respusta
+        res.status(200).send({
+          message: "update user",
+          user: userupdated
+        });
+  
+      });
+    }
+
 
   }
 };
