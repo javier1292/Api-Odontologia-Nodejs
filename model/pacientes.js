@@ -3,12 +3,15 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-//Modelo de Procediento 
+//Modelo de Procedimiento 
 var ProcedureSchema = Schema({
 
     name: String,
     description:String,
+    document:String,
     date:{type: Date, default: Date.now},
+    user: {type: Schema.ObjectId, ref: 'user'},
+
 });
 
 var procedure = mongoose.model('procedure', ProcedureSchema);
@@ -19,8 +22,10 @@ var PacientesSchema = Schema({
     surname: String,
     telefono:String,
     email: String,
-    procedure: [ProcedureSchema],
-    user: {type:schema.objectId, ref: 'user'},
+    edad: String,
+    imagen:String,
+    procedures: [ProcedureSchema],
+    user: {type: Schema.ObjectId, ref: 'user'},
 
 });
 
