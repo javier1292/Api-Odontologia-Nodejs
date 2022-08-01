@@ -1,6 +1,7 @@
 'use strict'
 
 var mongoose = require('mongoose');
+var mongoosepaginate = require('mongoose-paginate-v2');
 var Schema = mongoose.Schema;
 
 //Modelo de Procedimiento 
@@ -28,5 +29,8 @@ var PacientesSchema = Schema({
     user: {type: Schema.ObjectId, ref: 'user'},
 
 });
+
+//cargar paginacion 
+PacientesSchema.plugin(mongoosepaginate);
 
 module.exports = mongoose.model('Pacientes', PacientesSchema);

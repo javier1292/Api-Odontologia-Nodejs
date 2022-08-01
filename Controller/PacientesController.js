@@ -2,6 +2,7 @@
 
 var Paciente = require("../model/pacientes");
 var validator = require("validator");
+const pacientes = require("../model/pacientes");
 
 var controller = {
   save: function (req, res) {
@@ -37,6 +38,7 @@ var controller = {
       paciente.telefono = params.telefono;
       paciente.email = params.email;
       paciente.edad = params.edad;
+      paciente.user = req.user.sub;
 
       //guardar el paciente
       paciente.save((err, pacienteStore) => {
@@ -57,15 +59,51 @@ var controller = {
       });
     }
   },
-  list: function(req, res){
-    //cargar la libreria de paginacion 
-    //recoger la pagina actual 
-    //indicar las opciones de paginacion 
+  list: function (req, res) {
+    //recoger la pagina actual
+    if (
+      !req.params.page||
+      req.params.page == null||
+      req.params.page == 0||
+      req.params.page == "0"||
+      req.params.page == undefined
+    ) {
+      var pages = 1;
+    } else {
+      var pages =parseInt(req.params.page);
+    }
+    //indicar las opciones de paginacion
+    var opciones={
+      sort:{date: -1},
+      populate: 'user',
+      limit: 6,
+      page: pages
+
+    }
     //find paginado
-    //devolver resultado
-    return res.status(200).send({
-      message:'list'});
-  }
+    pacientes.paginate({},opciones,(err,pacientes)=>{
+
+
+      if(err){
+        return res.status(500).send({
+          message: "error al hacer una consulta "
+        });
+      }
+      if(!pacientes){
+        return res.status(404).send({
+          message: "Not found"
+        });
+      }
+      
+      //devolver resultado
+      return res.status(200).send({
+        status: "success",
+        pacientes: pacientes.docs,
+        totalDocs: pacientes.totalDocs,
+        totalPages: pacientes.totalPages,
+      });
+    });
+  },
 };
 
 module.exports = controller;
