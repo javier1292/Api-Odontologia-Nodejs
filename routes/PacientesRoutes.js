@@ -13,5 +13,6 @@ router.get('/user-pacientes/:user', pacientesController.getPacientes);
 router.get('/pacientes/detalles/:id', pacientesController.detalllePaciente);
 router.put('/pacientes/update/:id', md_auth.authenticate,pacientesController.update);
 router.delete('/pacientes/delete/:id', md_auth.authenticate,pacientesController.delete);
+router.get('/pacientes-search/:search', md_auth.authenticate, pacientesController.search);
 
 module.exports = router;

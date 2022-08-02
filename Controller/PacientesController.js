@@ -236,6 +236,31 @@ var controller = {
         pacienteDeleted
       });
     });
+  },
+  search: function (req, res){
+    //sacar el string a buscar de la url 
+    var search = req.params.search;
+    //find or 
+    Paciente.find({"$or":[
+      {"name":{"$regex": search,"$options": "i"} },
+      {"surname":{"$regex": search,"$options": "i"} }
+    ]}).exec((err, pacientes)=>{
+      if(err){
+        return res.status(400).send({
+          message: "error en la peticion "
+        });
+      }
+      if(!pacientes){
+        return res.status(404).send({
+          message: "no hay pacientes disponibles "
+        });
+      }
+        return res.status(200).send({
+          message:"success",
+          pacientes
+        });
+      
+    });
   }
 };
 
