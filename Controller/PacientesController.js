@@ -261,7 +261,64 @@ var controller = {
         });
       
     });
-  }
+  },
+  upload: function (req, res) {
+    //recoger el fichero de la peticion
+    var filename = "avatar no subido.....";
+
+    if (!req.files) {
+      return res.status(404).send({
+        status: "error",
+        message: filename,
+      });
+    }
+
+    //conseguir el nombre y la extencion del archivo subido
+    var file_path = req.files.file0.path;
+    var file_split = file_path.split("\\");
+    //nombre del archivo
+    var file_name = file_split[2];
+    //extencion del archivo
+    var ext_split = file_name.split(".");
+    var file_ext = ext_split[1];
+    //comprobar extension
+    if (
+      file_ext != "png" &&
+      file_ext != "jpg" &&
+      file_ext != "jpeg" &&
+      file_ext != "gif"
+    ) {
+      fs.unlink(file_path, (err) => {
+        return res.status(400).send({
+          message: "la extencion del archivo no es valida",
+        });
+      });
+    } else {
+      // sacar el usuario identificado
+      var pacienteId = req.params.id;
+      //hacer el update para actualizar el opbjeto
+      Paciente.findByIdAndUpdate(
+        { _id: pacienteId },
+        { imagen: file_name },
+        { new: true },
+        (err, pacienteUpdate) => {
+          if (err || !pacienteUpdate) {
+            return res.status(500).send({
+              message: "error al subir imagen ",
+            });
+          } else {
+            //devolver una respusta
+            return res.status(200).send({
+              message: "uploaded",
+              user: pacienteUpdate,
+            });
+          }
+        }
+      );
+    }
+
+    //comprobar el usuario identificado
+  },
 };
 
 module.exports = controller;
