@@ -62,39 +62,35 @@ var controller = {
   list: function (req, res) {
     //recoger la pagina actual
     if (
-      !req.params.page||
-      req.params.page == null||
-      req.params.page == 0||
-      req.params.page == "0"||
+      !req.params.page ||
+      req.params.page == null ||
+      req.params.page == 0 ||
+      req.params.page == "0" ||
       req.params.page == undefined
     ) {
       var pages = 1;
     } else {
-      var pages =parseInt(req.params.page);
+      var pages = parseInt(req.params.page);
     }
     //indicar las opciones de paginacion
-    var opciones={
-      sort:{date: -1},
-      populate: 'user',
+    var opciones = {
+      sort: { date: -1 },
+      populate: "user",
       limit: 6,
-      page: pages
-
-    }
+      page: pages,
+    };
     //find paginado
-    pacientes.paginate({},opciones,(err,pacientes)=>{
-
-
-      if(err){
+    pacientes.paginate({}, opciones, (err, pacientes) => {
+      if (err) {
         return res.status(500).send({
-          message: "error al hacer una consulta "
+          message: "error al hacer una consulta ",
         });
       }
-      if(!pacientes){
+      if (!pacientes) {
         return res.status(404).send({
-          message: "Not found"
+          message: "Not found",
         });
       }
-      
       //devolver resultado
       return res.status(200).send({
         status: "success",
@@ -103,6 +99,57 @@ var controller = {
         totalPages: pacientes.totalPages,
       });
     });
+  },
+  getPacientes: function (req, res) {
+    //conseguir id de usuario
+    var userid = req.params.user;
+
+    // find con una condicion de usuaio
+    Paciente.find({ user: userid })
+      .sort([["date", "descending"]])
+      .exec((err, paciente) => {
+        if (err) {
+          return res.status(400).send({
+            message: "Error al buscar un paciente",
+          });
+        }
+        if (!paciente) {
+          return res.status(400).send({
+            message: "este user no tiene pacientes registardo ",
+          });
+        }
+        //devolver el resultado
+        return res.status(200).send({
+          status: "success",
+          pacientes: paciente,
+        });
+      });
+  },
+  detalllePaciente: function (req, res) {
+    //sacr id del paciente
+    var pacienteid = req.params.id;
+
+    // find por id del paciente
+    Paciente.findById(pacienteid)
+      .populate("user")
+      .exec((err, pacientes) => {
+        if (err) {
+          return res.status(400).send({
+            message: "error al obtener el detalle",
+          });
+        }
+        if (!pacientes) {
+          return res.status(400).send({
+            message: "no hay paciente ",
+          });
+        } else {
+          //devlver el resultado
+          return res.status(200).send({
+            status: "success",
+            pacientes,
+          });
+        }
+      });
   },
 };
 

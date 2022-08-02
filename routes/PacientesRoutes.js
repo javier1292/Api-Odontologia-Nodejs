@@ -8,6 +8,8 @@ var md_auth = require('../middleware/authenticate');
 
 
 router.post('/paciente', md_auth.authenticate, pacientesController.save);
-router.get('/pacientes/:page', md_auth.authenticate, pacientesController.list);
+router.get('/pacientes/:page?', md_auth.authenticate, pacientesController.list);
+router.get('/user-pacientes/:user', pacientesController.getPacientes);
+router.get('/pacientes/detalles/:id', pacientesController.detalllePaciente);
 
 module.exports = router;
