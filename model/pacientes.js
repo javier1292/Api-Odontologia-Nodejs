@@ -25,7 +25,7 @@ var PacientesSchema = Schema({
     email: String,
     edad: String,
     imagen:String,
-    procedures: [ProcedureSchema],
+    procedure: [ProcedureSchema],
     user: {type: Schema.ObjectId, ref: 'user'},
 
 });
