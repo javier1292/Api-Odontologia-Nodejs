@@ -11,5 +11,7 @@ router.post('/paciente', md_auth.authenticate, pacientesController.save);
 router.get('/pacientes/:page?', md_auth.authenticate, pacientesController.list);
 router.get('/user-pacientes/:user', pacientesController.getPacientes);
 router.get('/pacientes/detalles/:id', pacientesController.detalllePaciente);
+router.put('/pacientes/update/:id', md_auth.authenticate,pacientesController.update);
+router.delete('/pacientes/delete/:id', md_auth.authenticate,pacientesController.delete);
 
 module.exports = router;

@@ -151,6 +151,73 @@ var controller = {
         }
       });
   },
+  update: function (req, res){
+    //recoger el id del paceinte 
+    var pacientesId = req.params.id;
+    // recoger los datos que llegan desde el post
+    var params = req.body;
+     //validar los datos
+     try {
+      var validate_name = !validator.isEmpty(params.name);
+      var validate_surname = !validator.isEmpty(params.surname);
+      var validate_telefono = !validator.isEmpty(params.telefono);
+      var validate_email =
+        !validator.isEmpty(params.email) && validator.isEmail(params.email);
+      var validate_edad = !validator.isEmpty(params.edad);
+    } catch (ex) {
+      return res.status(403).send({
+        message: "Faltan datos",
+      });
+    }
+    if (
+      validate_name &&
+      validate_surname &&
+      validate_telefono &&
+      validate_email &&
+      validate_edad
+    ) {
+      //montar  un json con los datos modificados 
+      var update = {
+        name: params.name,
+        surname:params.surname,
+        telefono:params.telefono,
+        email:params.email,
+        edad:params.edad
+      };
+      // find and update del paceinte por id de usuario 
+      Paciente.findOneAndUpdate({_id:pacientesId, user:req.user.sub},update,{new:true},(err,paceinteUpdated)=>{
+
+        if(err){
+          return res.status(400).send({
+            message:"error en la peticion"
+          });
+        }
+        if(!paceinteUpdated){
+          return res.status(400).send({
+            message:"no se actualizo el paciente "
+          });
+        }
+        
+        //devolver respuesta
+        return res.status(200).send({
+          status:"success",
+          paceinteUpdated
+        });
+      });
+      
+      
+    }else{
+      return res.status(400).send({
+        message:"validacion de datos incorrecta"
+      });
+    }
+  },
+  delete: function (req, res){
+
+    return res.status(200).send({
+      message:"delete"
+    });
+  }
 };
 
 module.exports = controller;
