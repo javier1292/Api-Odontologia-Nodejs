@@ -2,7 +2,7 @@
 
 var Paciente = require("../model/pacientes");
 var validator = require("validator");
-const pacientes = require("../model/pacientes");
+
 
 var controller = {
   save: function (req, res) {
@@ -235,7 +235,7 @@ var controller = {
         status:"success",
         pacienteDeleted
       });
-    })
+    });
   }
 };
 
