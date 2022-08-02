@@ -214,9 +214,28 @@ var controller = {
   },
   delete: function (req, res){
 
-    return res.status(200).send({
-      message:"delete"
-    });
+    //sacra el id del paceinte por url
+    var pacienteId = req.params.id;
+    //find and delete paciente by user id 
+    Paciente.findByIdAndDelete({_id:pacienteId,user: req.user.sub},(err,pacienteDeleted)=>{
+      if(err){
+        return res.status(400).send({
+          status:"error",
+          message:"error al borrar apaciente"
+        });
+      }
+      if(!pacienteDeleted){
+        return res.status(400).send({
+          status:"error",
+          message:"no se encontro el paciente"
+        });
+      }
+      //devolver una respuesta 
+      return res.status(200).send({
+        status:"success",
+        pacienteDeleted
+      });
+    })
   }
 };
 
