@@ -2,7 +2,8 @@
 
 var Paciente = require("../model/pacientes");
 var validator = require("validator");
-
+var fs = require("fs");
+var path = require("path");
 
 var controller = {
   save: function (req, res) {

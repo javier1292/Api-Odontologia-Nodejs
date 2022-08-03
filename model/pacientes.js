@@ -9,7 +9,7 @@ var ProcedureSchema = Schema({
 
     name: String,
     description:String,
-    document:String,
+    imagen:String,
     date:{type: Date, default: Date.now},
     user: {type: Schema.ObjectId, ref: 'user'},
 
