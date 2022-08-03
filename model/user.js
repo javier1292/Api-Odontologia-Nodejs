@@ -1,9 +1,9 @@
 'use strict'
 
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-var userSchema = Schema({
+const userSchema = Schema({
     name: String,
     surname: String,
     email:String,
@@ -12,7 +12,7 @@ var userSchema = Schema({
     role: String
 });
 userSchema.methods.toJSON = function (){
-    var obj = this.toObject();
+    const obj = this.toObject();
     delete obj.password;
     return obj;
 }

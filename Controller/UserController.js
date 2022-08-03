@@ -1,96 +1,106 @@
 "use strict";
-var validator = require("validator");
-var User = require("../model/user");
-var bcrypt = require("bcrypt-nodejs");
-var jwt = require("../services/jwt");
-var fs = require("fs");
-var path = require("path");
+const validator = require('validator');
+const User = require("../model/user");
+const bcrypt = require("bcrypt-nodejs");
+const jwt = require("../services/jwt");
+const fs = require("fs");
+const path = require("path");
 
-var controller = {
+
+const controller = {
   save: function (req, res) {
     //recoger los parametros de la peticion
-    var params = req.body;
+    const params = req.body;
 
-    //validar los datos
-    var validate_name = !validator.isEmpty(params.name);
-    var validate_surname = !validator.isEmpty(params.surname);
-    var validate_email =
-      !validator.isEmpty(params.email) && validator.isEmail(params.email);
-    var validate_password = !validator.isEmpty(params.password);
-
-    if (
-      validate_name &&
-      validate_surname &&
-      validate_email &&
-      validate_password
-    ) {
-      //crear objeto
-      var user = new User();
-
-      //asignar valores
-      user.name = params.name;
-      user.surname = params.surname;
-      user.password = params.password;
-      user.email = params.email.toLowerCase();
-      user.role = "admin";
-      user.image = null;
-
-      //comprobar si el usuario ya existe
-      User.findOne({ email: user.email }, (err, issetuser) => {
-        if (err) {
-          return res.status(400).send({
-            message:
-              "Ya existe un usuario con estta direccion de correo electronico ",
-          });
-        }
-
-        if (!issetuser) {
-          //cifrar la contraseña
-          bcrypt.hash(params.password, null, null, (err, hash) => {
-            user.password = hash;
-
-            //Guardar el usuario
-            user.save((err, userStored) => {
-              if (err) {
-                return res.status(400).send({
-                  message: "Error al guardar el usurio ",
+    try{
+      //validar los datos
+      const validate_name = !validator.isEmpty(params.name);
+      const validate_surname = !validator.isEmpty(params.surname);
+      const validate_email =
+        !validator.isEmpty(params.email) && validator.isEmail(params.email);
+      const validate_password = !validator.isEmpty(params.password);
+      
+      if (
+        validate_name &&
+        validate_surname &&
+        validate_email &&
+        validate_password
+      ) {
+        //crear objeto
+        const user = new User();
+  
+        //asignar valores
+        user.name = params.name;
+        user.surname = params.surname;
+        user.password = params.password;
+        user.email = params.email.toLowerCase();
+        user.role = "admin";
+        user.image = null;
+  
+        //comprobar si el usuario ya existe
+        User.findOne({ email: user.email }, (err, issetuser) => {
+          if (err) {
+            return res.status(400).send({
+              message:
+                "Ya existe un usuario con estta direccion de correo electronico ",
+            });
+          }
+  
+          if (!issetuser) {
+            //cifrar la contraseña
+            bcrypt.hash(params.password, null, null, (err, hash) => {
+              user.password = hash;
+  
+              //Guardar el usuario
+              user.save((err, userStored) => {
+                if (err) {
+                  return res.status(400).send({
+                    message: "Error al guardar el usurio ",
+                  });
+                }
+  
+                if (!userStored) {
+                  return res.status(400).send({
+                    message: "El usuario no se guardo ",
+                  });
+                }
+  
+                //devolver la respuesta
+                return res.status(200).send({
+                  message: "Usuario guardado correctamente ",
+                  user: userStored,
                 });
-              }
-
-              if (!userStored) {
-                return res.status(400).send({
-                  message: "El usuario no se guardo ",
-                });
-              }
-
-              //devolver la respuesta
-              return res.status(200).send({
-                message: "Usuario guardado correctamente ",
-                user: userStored,
               });
             });
-          });
-        } else {
-          return res.status(400).send({
-            message: "Ya existe un usuario con este correo",
-          });
-        }
+          } else {
+            return res.status(400).send({
+              message: "Ya existe un usuario con este correo",
+            });
+          }
+        });
+      } else {
+        //devolver la respuesta
+        return res.status(400).send({
+          message: "Llene los datos correctamente ",
+        });
+      }
+    }catch(ex){
+
+      return res.status(403).send({
+        message: "Faltan datos",
       });
-    } else {
-      //devolver la respuesta
-      return res.status(400).send({
-        message: "Llene los datos correctamente ",
-      });
+        
     }
+
   },
   login: function (req, res) {
     //recoger los parametros de la peticion
-    var params = req.body;
+    const params = req.body;
 
     //validar datos
-    var validate_email =
+    const validate_email =
       !validator.isEmpty(params.email) && validator.isEmail(params.email);
-    var validate_password = !validator.isEmpty(params.password);
+    const validate_password = !validator.isEmpty(params.password);
 
     if (!validate_email && validate_password) {
       return res.status(400).send({
@@ -137,74 +147,79 @@ var controller = {
       });
     });
   },
-  update: function (req, res) {
-    //recoger los datos del usuari
-    var params = req.body;
-    //vaqlidar datos
+  update:async function (req, res) {
     try {
-      var validate_name = !validator.isEmpty(params.name);
-      var validate_surname = !validator.isEmpty(params.surname);
-      var validate_email =
-        !validator.isEmpty(params.email) && validator.isEmail(params.email);
+
+      //recoger los datos del usuari
+      const params = req.body;
+      //vaqlidar datos
+     
+  
+      //eliminar propiedades innecesarias
+      params.password && delete params.password;
+      //user id
+      const userId = req.user.sub;
+  
+      //comprobar el email
+      if (req.user.email != params.email) {
+
+        params.email && await User.findOne({ email: params.email  }, (err, user) => {
+
+          if (err) {
+            res.status(500).send({
+              message: "error al intentar identificarse",
+            });
+          }
+  
+          if (user && user.email == params.email) {
+            res.status(400).send({
+              message: "el email no puede ser modificado",
+            });
+          }
+        });
+
+
+      } 
+
+        //buscar y actualizar documentos de la base de datos
+       await User.findOneAndUpdate(
+          { _id: userId },
+          params,
+          { new: true },
+          (err, userupdated) => {
+            if (err) {
+              res.status(500).send({
+                message: "error al actualizar el user",
+                user: userupdated,
+              });
+            }
+  
+            if (!userupdated) {
+              res.status(500).send({
+                message: "error",
+                user: userupdated,
+              });
+            }else{
+  
+              //devolver respusta
+              res.status(200).send({
+                message: "update user",
+                user: userupdated,
+              });
+            }
+          }
+        );
+      
     } catch (err) {
       res.status(400).send({
         message: "faltan datos por enviar ",
         params,
       });
     }
-
-    //eliminar propiedades innecesarias
-    delete params.password;
-    //user id
-    var userId = req.user.sub;
-
-    //comprobar el email
-    if (req.user.email != params.email) {
-      User.findOne({ email: params.email.toLowerCase() }, (err, user) => {
-        if (err) {
-          res.status(500).send({
-            message: "error al intentar identificarse",
-          });
-        }
-
-        if (user && user.email == params.email) {
-          res.status(200).send({
-            message: "el email no puede ser modificado",
-          });
-        }
-      });
-    } else {
-      //buscar y actualizar documentos de la base de datos
-      User.findOneAndUpdate(
-        { _id: userId },
-        params,
-        { new: true },
-        (err, userupdated) => {
-          if (err) {
-            res.status(500).send({
-              message: "error al actualizar el user",
-              user: userupdated,
-            });
-          }
-
-          if (!userupdated) {
-            res.status(500).send({
-              message: "error",
-              user: userupdated,
-            });
-          }
-          //devolver respusta
-          res.status(200).send({
-            message: "update user",
-            user: userupdated,
-          });
-        }
-      );
-    }
   },
   upload: function (req, res) {
     //recoger el fichero de la peticion
-    var filename = "avatar no subido.....";
+    const filename = "avatar no subido.....";
 
     if (!req.files) {
       return res.status(404).send({
@@ -212,15 +227,14 @@ var controller = {
         message: filename,
       });
     }
-
     //conseguir el nombre y la extencion del archivo subido
-    var file_path = req.files.file0.path;
-    var file_split = file_path.split("\\");
+    const file_path = req.files.file0.path;
+    const file_split = file_path.split("\\");
     //nombre del archivo
-    var file_name = file_split[2];
+    const file_name = file_split[2];
     //extencion del archivo
-    var ext_split = file_name.split(".");
-    var file_ext = ext_split[1];
+    const ext_split = file_name.split(".");
+    const file_ext = ext_split[1];
     //comprobar extension
     if (
       file_ext != "png" &&
@@ -235,7 +249,7 @@ var controller = {
       });
     } else {
       // sacar el usuario identificado
-      var userId = req.user.sub;
+      const userId = req.user.sub;
       //hacer el update para actualizar el opbjeto
       User.findByIdAndUpdate(
         { _id: userId },
@@ -260,8 +274,8 @@ var controller = {
     //comprobar el usuario identificado
   },
   avatar: function (req, res) {
-    var fileName = req.params.fileName;
-    var pathfile = "./uploads/users/" + fileName;
+    const fileName = req.params.fileName;
+    const pathfile = "./uploads/users/" + fileName;
     console.log(pathfile);
 
     if (fs.existsSync(pathfile)) {
@@ -288,7 +302,7 @@ var controller = {
 
   },
   getuser: function(req,res){
-    var userId = req.params.userId;
+    const userId = req.params.userId;
     User.findById(userId).exec((err,user)=>{
       if (err || !user){
         return res.status(404).send({

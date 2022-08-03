@@ -1,14 +1,14 @@
 "use strict";
 
-var Paciente = require("../model/pacientes");
-var validator = require("validator");
-var fs = require("fs");
-var path = require("path");
+const Paciente = require("../model/pacientes");
+const validator = require("validator");
+const fs = require("fs");
+const path = require("path");
 
-var Controller = {
+const Controller = {
   save: function (req, res) {
     //recoger el id del paceinte
-    var pacienteid = req.params.idP;
+    const pacienteid = req.params.idP;
     //find por id  del paciente
     Paciente.findById(pacienteid).exec((err, pacientes) => {
       if (err) {
@@ -26,42 +26,44 @@ var Controller = {
       if (req.body.name && req.body.description) {
         //validar los datos
         try {
-          var validate_name = !validator.isEmpty(req.body.name);
-          var validate_description = !validator.isEmpty(req.body.description);
-        } catch (ex) {
-          return res.status(400).send({
-            message: "No agrergaste una descripcion",
-          });
-        }
-        if (validate_name && validate_description) {
-          var procedure = {
-            use: req.user.sub,
-            name: req.body.name,
-            description: req.body.description,
-          };
-          //en la propiedad  de procedures del paciente resultante hacer un push
-          pacientes.procedure.push(procedure);
 
-          //gauarda el paciente completo
-          pacientes.save((err,procedurestored) => {
-            if (err) {
-              return res.status(400).send({
-                message: "error",
-               
+          const validate_name = !validator.isEmpty(req.body.name);
+          const validate_description = !validator.isEmpty(req.body.description);
+          if (validate_name && validate_description) {
+            const procedure = {
+              use: req.user.sub,
+              name: req.body.name,
+              description: req.body.description,
+            };
+            //en la propiedad  de procedures del paciente resultante hacer un push
+            pacientes.procedure.push(procedure);
+  
+            //gauarda el paciente completo
+            pacientes.save((err,procedurestored) => {
+              if (err) {
+                return res.status(400).send({
+                  message: "error",
+                 
+                });
+              }
+             
+  
+              //devolver la respuesta
+              return res.status(200).send({
+                message: "store",
+                procedurestored
               });
-            }
-           
-
-            //devolver la respuesta
-            return res.status(200).send({
-              message: "store",
-              procedurestored
             });
-          });
-        } else {
+          } else {
+            return res.status(400).send({
+              message: "faltan datos",
+            });
+          }
+        }catch(ex){
+
           return res.status(400).send({
-            message: "faltan datos",
-          });
+            ex
+          })
         }
       } else {
         return res.status(400).send({
@@ -71,29 +73,24 @@ var Controller = {
     });
   },
   update: function (req, res) {
+    try {
     //conseguir el id del procedure
-    var procedureId = req.params.id
+    const procedureId = req.params.id
 
     //recoger datos y validar
-    var params = req.body;
+    const params = req.body;
 
      //validar los datos
-     try {
-      var validate_name = !validator.isEmpty(params.name);
-      var validate_description = !validator.isEmpty(params.description);
-    } catch (ex) {
-      return res.status(400).send({
-        message: "No agrergaste una descripcion",
-      });
-    }
-
-    if(validate_name && validate_description){
-      //find and update de sub documento
-      Paciente.findOneAndUpdate(
-        {"procedure._id":procedureId},
-        {
-          "$set":{
-            "procedure.$.name": params.name,
+      const validate_name = !validator.isEmpty(params.name);
+      const validate_description = !validator.isEmpty(params.description);
+      
+      if(validate_name && validate_description){
+        //find and update de sub documento
+        Paciente.findOneAndUpdate(
+          {"procedure._id":procedureId},
+          {
+            "$set":{
+              "procedure.$.name": params.name,
             "procedure.$.description": params.description
           }
         },{new:true},(err,procedureUpdate)=>{
@@ -108,7 +105,7 @@ var Controller = {
               message: "ese procedimiento no existe "
             });
           } else{
-
+            
             //devolver datos
             return res.status(200).send({
               message: "update",
@@ -117,15 +114,20 @@ var Controller = {
           }
           
         });
-    }else{
-      return res.status(400).send({ message:"faltan datos "});
+      }else{
+        return res.status(400).send({ message:"faltan datos "});
+      }
+    } catch (ex) {
+      return res.status(400).send({
+        message: "No agrergaste una descripcion",
+      });
     }
     
   },
   delete: function (req, res) {
     //sacar el id del paceinte y del procedure
-    var pacienteId = req.params.idP
-    var procedureId = req.params.id
+    const pacienteId = req.params.idP
+    const procedureId = req.params.id
     //buscar el paciente 
     Paciente.findById(pacienteId,(err,paciente)=>{
       if(err){
@@ -141,7 +143,7 @@ var Controller = {
 
       }
       //seleccionar el ,procedure 
-      var Proces = paciente.procedure.id(procedureId);
+      const Proces = paciente.procedure.id(procedureId);
       if(Proces){
         //borrar el procedure 
         Proces.remove();
@@ -172,7 +174,7 @@ var Controller = {
   },
   upload: function (req, res) {
     //recoger el fichero de la peticion
-    var filename = "avatar no subido.....";
+    const filename = "avatar no subido.....";
 
     if (!req.files) {
       return res.status(404).send({
@@ -182,13 +184,13 @@ var Controller = {
     }
 
     //conseguir el nombre y la extencion del archivo subido
-    var file_path = req.files.file0.path;
-    var file_split = file_path.split("\\");
+    const file_path = req.files.file0.path;
+    const file_split = file_path.split("\\");
     //nombre del archivo
-    var file_name = file_split[2];
+    const file_name = file_split[2];
     //extencion del archivo
-    var ext_split = file_name.split(".");
-    var file_ext = ext_split[1];
+    const ext_split = file_name.split(".");
+    const file_ext = ext_split[1];
     //comprobar extension
     if (
       file_ext != "png" &&
@@ -203,7 +205,7 @@ var Controller = {
       });
     } else {
       //conseguir el id del procedure
-      var procedureId = req.params.id
+      const procedureId = req.params.id
       //hacer el update para actualizar el opbjeto 
       Paciente.findOneAndUpdate(
         {"procedure._id":procedureId},
@@ -212,9 +214,15 @@ var Controller = {
             "procedure.$.imagen": file_name,
           }
         },{new:true},(err,procedureUpdate)=>{
-          if (err || !procedureUpdate) {
+          if (err) {
             return res.status(500).send({
-              message: "error al subir imagen ",
+              
+              err:err
+            });
+          }
+          if(!procedureUpdate){
+            return res.status(500).send({
+              message: "error al imagen ",
               err
             });
           } else{
@@ -232,8 +240,8 @@ var Controller = {
     //comprobar el usuario identificado
   },
   getImagen: function(req, res){
-    var fileName = req.params.fileName;
-    var pathfile = "./uploads/porcedure/" + fileName;
+    const fileName = req.params.fileName;
+    const pathfile = "./uploads/porcedure/" + fileName;
     console.log(pathfile);
 
     if (fs.existsSync(pathfile)) {

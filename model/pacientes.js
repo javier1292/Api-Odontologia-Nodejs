@@ -1,11 +1,11 @@
 'use strict'
 
-var mongoose = require('mongoose');
-var mongoosepaginate = require('mongoose-paginate-v2');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const mongoosepaginate = require('mongoose-paginate-v2');
+const Schema = mongoose.Schema;
 
 //Modelo de Procedimiento 
-var ProcedureSchema = Schema({
+const ProcedureSchema = Schema({
 
     name: String,
     description:String,
@@ -15,10 +15,10 @@ var ProcedureSchema = Schema({
 
 });
 
-var procedure = mongoose.model('procedure', ProcedureSchema);
+const procedure = mongoose.model('procedure', ProcedureSchema);
 
 //Modelo de pacientes
-var PacientesSchema = Schema({
+const PacientesSchema = Schema({
     name: String,
     surname: String,
     telefono:String,
