@@ -12,5 +12,6 @@ router.post('/procedimiento/:idP', md_auth.authenticate,procedimientoController.
 router.put('/procedimiento/update/:id', md_auth.authenticate,procedimientoController.update);
 router.post('/procedimiento/upload/:id',[md_uploaad, md_auth.authenticate],procedimientoController.upload);
 router.delete('/procedimiento/delete/:idP/:id', md_auth.authenticate,procedimientoController.delete);
+router.get('/procedimiento/doc/:fileName',procedimientoController.getImagen);
 
 module.exports = router;

@@ -17,5 +17,5 @@ router.put('/pacientes/update/:id', md_auth.authenticate,pacientesController.upd
 router.delete('/pacientes/delete/:id', md_auth.authenticate,pacientesController.delete);
 router.get('/pacientes-search/:search', md_auth.authenticate, pacientesController.search);
 router.post('/upload-paceinte/:id',[md_uploaad, md_auth.authenticate],pacientesController.upload);
-
+router.get('/paceinte/img/:fileName',pacientesController.getImagen);
 module.exports = router;

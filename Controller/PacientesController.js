@@ -320,6 +320,19 @@ var controller = {
 
     //comprobar el usuario identificado
   },
+  getImagen: function(req, res){
+    var fileName = req.params.fileName;
+    var pathfile = "./uploads/Pacientes/" + fileName;
+    console.log(pathfile);
+
+    if (fs.existsSync(pathfile)) {
+      return res.sendFile(path.resolve(pathfile));
+    }else{
+      return res.status(404).send({
+        message: "la imagen no existe",
+      });
+    }
+  }
 };
 
 module.exports = controller;
