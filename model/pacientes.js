@@ -27,6 +27,7 @@ const PacientesSchema = Schema({
     imagen:String,
     procedure: [ProcedureSchema],
     user: {type: Schema.ObjectId, ref: 'user'},
+    date:{type: Date, default: Date.now},
 
 });
 

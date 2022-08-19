@@ -106,7 +106,7 @@ const controller = {
 
     // find con una condicion de usuaio
     Paciente.find({ user: userid })
-      .sort([["date", "descending"]])
+      .sort({date: -1})
       .exec((err, paciente) => {
         if (err) {
           return res.status(400).send({

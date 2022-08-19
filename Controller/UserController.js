@@ -133,6 +133,7 @@ const controller = {
             // devolver los datos de login
             return res.status(200).send({
               message: "Login succes",
+              user: user,
               token: jwt.createToken(user),
             });
           } else {
