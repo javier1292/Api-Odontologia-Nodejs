@@ -1,10 +1,14 @@
 "use strict";
 const validator = require('validator');
 const User = require("../model/user");
-const bcrypt = require("bcrypt-nodejs");
+const bcrypt = require("bcrypt");
 const jwt = require("../services/jwt");
 const fs = require("fs");
 const path = require("path");
+const saltRounds = 10;
+const myPlaintextPassword = 's0/\/\P4$$w0rD';
+const someOtherPlaintextPassword = 'not_bacon';
+const hash = bcrypt.hashSync(myPlaintextPassword, saltRounds);
 
 
 const controller = {
@@ -48,7 +52,6 @@ const controller = {
   
           if (!issetuser) {
             //cifrar la contraseña
-            bcrypt.hash(params.password, null, null, (err, hash) => {
               user.password = hash;
   
               //Guardar el usuario
@@ -71,7 +74,7 @@ const controller = {
                   user: userStored,
                 });
               });
-            });
+
           } else {
             return res.status(400).send({
               message: "Ya existe un usuario con este correo",
@@ -125,7 +128,7 @@ const controller = {
 
       //si se encuentra
       //comprobar la password (coincidencia con email y password / bcrypt)
-      bcrypt.compare(params.password, user.password, (err, check) => {
+      bcrypt.compare(myPlaintextPassword, hash, (err, check) => {
         //si es correcto
         if (check) {
           //generar token con jwt
