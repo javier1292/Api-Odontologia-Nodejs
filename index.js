@@ -9,7 +9,7 @@ mongoose.Promise = global.Promise;
 mongoose.set('useFindAndModify', false );
 
 mongoose
-  .connect("mongodb://localhost:27017/api_odontologia", {
+  .connect("mongodb://127.0.0.1:27017/api_odontologia", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
